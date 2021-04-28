@@ -256,7 +256,7 @@ export default class Sudoku {
       for (const pi in Object.keys(this.SQUARE_PEERS_MAP[square])) {
         const peer = this.SQUARE_PEERS_MAP[square][pi];
 
-        const candidates_new = this.eliminate(candidates, peer.join(''), target_val);
+        const candidates_new = this.eliminate(candidates, peer as unknown as string, target_val);
 
         if (!candidates_new) {
           return false;

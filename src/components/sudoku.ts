@@ -1,5 +1,7 @@
 import isIn from "../utility/isIn";
 
+interface Difficulty { [diff: string]: number; }
+
 export default class Sudoku {
     private debug: boolean;
 
@@ -8,7 +10,7 @@ export default class Sudoku {
     public static COLS = Sudoku.DIGITS; // Column lables
     // Define difficulties by how many squares are given to the player in a new
     // puzzle.
-    public static DIFFICULTY = {
+    public static DIFFICULTY: Difficulty = {
       easy: 62,
       medium: 53,
       hard: 44,
@@ -21,11 +23,11 @@ export default class Sudoku {
     public static BLANK_BOARD = '.'.repeat(81);
     public static MIN_GIVENS = 17; // Minimum number of givens
     public static NR_SQUARES = 81; // Number of squares
-    public BLOCKS: Array<string[]> = [];
-    public SQUARES: Array<string>|null = null; // Square IDs
-    public UNITS: Array<string>|null = null; // All units (row, column, or box)
-    public SQUARE_UNITS_MAP: Record<string,unknown>|null = null; // Squares -> units map
-    public SQUARE_PEERS_MAP: Record<string,unknown>|null = null; // Squares -> peers map
+    public BLOCKS: string[][] = [];
+    public SQUARES: string[]; // Square IDs
+    public UNITS: string[][]; // All units (row, column, or box)
+    public SQUARE_UNITS_MAP: { [cur_square: string]: string[][] }; // Squares -> units map
+    public SQUARE_PEERS_MAP: { [cur_square: string]: string[][] }; // Squares -> peers map
 
 
     constructor(debug=false) {
@@ -50,11 +52,10 @@ export default class Sudoku {
     }
 
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    log(...args: Array<any>): void {
-      if(this.debug) {
-        console.log.apply(null, args);
-      }
+    log(): void {
+      // if(this.debug) {
+      //   console.log.apply(null, args);
+      // }
     }
 
     private _cross(a: string, b:string): Array<string> {
@@ -71,9 +72,9 @@ export default class Sudoku {
       return result;
     }
 
-    private _get_all_units(rows: string, cols: string): Array<string> {
+    private _get_all_units(rows: string, cols: string): string[][] {
       /* Return a list of all units (rows, cols, boxes) */
-      const units = [];
+      const units: string[][] = [];
 
       // Rows
       for (const ri in rows.split("")) {
@@ -97,9 +98,9 @@ export default class Sudoku {
       return units;
     }
 
-    private _get_square_units_map(squares: Array<string>, units: Array<string>): Record<string,string> {
+    private _get_square_units_map(squares: string[], units: string[][]): { [cur_square: string]: string[][] } {
       /* Return a map of `squares` and their associated units (row, col, box) */
-      const square_unit_map = {};
+      const square_unit_map: { [cur_square: string]: string[][] } = {};
 
       // For every square...
       for (const si in squares) {
@@ -127,11 +128,11 @@ export default class Sudoku {
 
     // Necessary to overcome the need to define all records completely
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private _get_square_peers_map(squares: Array<string>, units_map: any): Record<string,string> {
+    private _get_square_peers_map(squares: Array<string>, units_map: any): { [cur_square: string]: string[][] } {
     /* Return a map of `squares` and their associated peers, i.e., a set of
         other squares in the square's unit.
         */
-      const square_peers_map = {};
+      const square_peers_map: { [cur_square: string]: string[][] } = {};
 
       // For every square...
       for (const si in squares) {
@@ -171,49 +172,6 @@ export default class Sudoku {
       
   // Utility
   // -------------------------------------------------------------------------
-
-  public print_board(board: string): void {
-    /* Print a sudoku `board` to the console. */
-
-    // Assure a valid board
-    const report = this.validate_board(board);
-    if (report !== true) {
-      throw report;
-    }
-
-    const V_PADDING = ' '; // Insert after each square
-    const H_PADDING = '\n'; // Insert after each row
-
-    const V_BOX_PADDING = '  '; // Box vertical padding
-    const H_BOX_PADDING = '\n'; // Box horizontal padding
-
-    let display_string = '';
-
-    for (const iterator in board.split("")) {
-      const i = parseInt(iterator);
-      const square = board[i];
-
-      // Add the square and some padding
-      display_string += square + V_PADDING;
-
-      // Vertical edge of a box, insert v. box padding
-      if (i % 3 === 2) {
-        display_string += V_BOX_PADDING;
-      }
-
-      // End of a line, insert horiz. padding
-      if (i % 9 === 8) {
-        display_string += H_PADDING;
-      }
-
-      // Horizontal edge of a box, insert h. box padding
-      if (i % 27 === 26) {
-        display_string += H_BOX_PADDING;
-      }
-    }
-
-    console.log(display_string);
-  }
 
   validate_board(board: string, errorAsCoordinates = false): boolean|{row: string; col: number} {
     /* Return if the given `board` is valid or not. If it's valid, return
@@ -272,7 +230,7 @@ export default class Sudoku {
     return candidates;
   }
 
-  public eliminate (candidates:Record<string,string>, square: string, val: string): boolean|Record<string,string> {
+  public eliminate (candidates: { [square: string]: string }, square: string, val: string): boolean|Record<string,string> {
     /* Eliminate `val` from `candidates` at `square`, (candidates[square]),
         and propagate when values or places <= 2. Return updated candidates,
         unless a contradiction is detected, in which case, return false.
@@ -298,7 +256,7 @@ export default class Sudoku {
       for (const pi in Object.keys(this.SQUARE_PEERS_MAP[square])) {
         const peer = this.SQUARE_PEERS_MAP[square][pi];
 
-        const candidates_new = this.eliminate(candidates, peer, target_val);
+        const candidates_new = this.eliminate(candidates, peer.join(''), target_val);
 
         if (!candidates_new) {
           return false;

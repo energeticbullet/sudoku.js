@@ -3,21 +3,12 @@ import SudokuGetCandidates from "./get-candidates";
 import isIn from "../utility/isIn";
 
 export default class SudokuSolver {
-    private debug: boolean;
     private instance: Sudoku;
     private getCandidates: SudokuGetCandidates;
 
-    constructor(instance: Sudoku, debug=false) {
-        this.debug = debug;
+    constructor(instance: Sudoku) {
         this.instance = instance;
         this.getCandidates = new SudokuGetCandidates(instance);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    log(...args: Array<any>): void {
-      if(this.debug) {
-        console.log.apply(null, args);
-      }
     }
 
     public solve (board: string, reverse = false): string|boolean {
@@ -78,7 +69,6 @@ export default class SudokuSolver {
         // If only one candidate for every square, we've a solved puzzle!
         // Return the candidates map.
         let max_nr_candidates = 0;
-        let max_candidates_square = null;
         for (const si in this.instance.SQUARES) {
           const square = this.instance.SQUARES[si];
     
@@ -86,7 +76,6 @@ export default class SudokuSolver {
     
           if (nr_candidates > max_nr_candidates) {
             max_nr_candidates = nr_candidates;
-            max_candidates_square = square;
           }
         }
         if (max_nr_candidates === 1) {
@@ -110,14 +99,14 @@ export default class SudokuSolver {
         // starting with the one with fewest candidates.
     
         // Rotate through the candidates forwards
-        const min_candidates = candidates[min_candidates_square].split("");
+        const min_candidates = candidates[min_candidates_square as string].split("");
         if (!reverse) {
           for (const vi in min_candidates) {
             const val = min_candidates[vi];
     
             // TODO: Implement a non-rediculous deep copy function
             const candidates_copy: Record<string,string> = Object.assign({}, candidates);
-            const newCandidates = this.instance.assign(candidates_copy, min_candidates_square, val);
+            const newCandidates = this.instance.assign(candidates_copy, min_candidates_square as string, val);
             if(typeof newCandidates === "boolean") {
                 return false;
             }
@@ -135,7 +124,7 @@ export default class SudokuSolver {
     
             // TODO: Implement a non-rediculous deep copy function
             const candidates_copy: Record<string,string> = Object.assign({}, candidates);
-            const newCandidates = this.instance.assign(candidates_copy, min_candidates_square, val)
+            const newCandidates = this.instance.assign(candidates_copy, min_candidates_square as string, val)
             if(typeof newCandidates === "boolean") {
                 return false;
             }

@@ -1,6 +1,6 @@
 import Sudoku from "./sudoku";
 
-  const board_string_to_grid = (board_string: string): Array<string> => {
+  const board_string_to_grid = (board_string: string): string[][] => {
     /* Convert a board string to a two-dimensional array  */
     const rows = [];
     const boardStringArray = board_string.split("");
@@ -27,7 +27,7 @@ import Sudoku from "./sudoku";
   const board_string_to_object = (board_string: string): Record<string,string> => {
     /* Convert a board object from a string */
     const boardStringArray = board_string.split("");
-    const boardObject = {};
+    const boardObject: { [brd: string]: string } = {};
     let boardStringIterator = 0;
     Sudoku.ROWS.split("").forEach((row) => {
       Sudoku.COLS.split("").forEach(col => {
@@ -39,7 +39,7 @@ import Sudoku from "./sudoku";
   }
   const board_object_to_string = (boardObject: Record<string,string>): string => {
     /* Convert a board object from a string */
-    const boardStringArray = []
+    const boardStringArray: string[] = []
     let boardStringIterator = 0;
     Sudoku.ROWS.split("").forEach((row) => {
       Sudoku.COLS.split("").forEach(col => {

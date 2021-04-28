@@ -2,23 +2,13 @@ import Sudoku from "./sudoku";
 import isIn from "../utility/isIn";
 
 export default class SudokuGetCandidates {
-    private debug: boolean;
     private instance: Sudoku;
 
-    constructor(instance: Sudoku, debug = false) {
-        this.debug = debug;
+    constructor(instance: Sudoku) {
         this.instance = instance;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    log(...args: Array<any>): void {
-      if(this.debug) {
-        console.log.apply(null, args);
-      }
-    }
-
-    get(board:string): Array<string>|boolean {
-      this.log("Getting all candidates");
+    get(board:string): string[][]|boolean {
         /* Return all possible candidatees for each square as a grid of
             candidates, returnning `false` if a contradiction is encountered.
     
@@ -31,11 +21,9 @@ export default class SudokuGetCandidates {
         if (report !== true) {
           throw report;
         }
-        this.log("Board valid");
 
         // Get a candidates map
         const candidates_map = this.map(board);
-        this.log("Current map: ", candidates_map);
 
         // If there's an error, return false
         if (!candidates_map) {
@@ -47,7 +35,7 @@ export default class SudokuGetCandidates {
         let cur_row = [];
         let i = 0;
         for (const square in Object.keys(candidates_map)) {
-          const candidates = candidates_map[square];
+          const candidates = (candidates_map as { [square: string]: string })[square];
           cur_row.push(candidates);
           if (i % 9 == 8) {
             rows.push(cur_row);
@@ -55,11 +43,10 @@ export default class SudokuGetCandidates {
           }
           ++i;
         }
-        this.log("Returned grid: ", rows);
         return rows;
       }
     
-      map(board:string): Record<string,string>|boolean {
+      map(board:string): { [square: string]: string } | boolean {
         /*  Get all possible candidates for each square as a map in the form
             {square: sudoku.DIGITS} using recursive constraint propagation. Return `false`
             if a contradiction is encountered
@@ -71,7 +58,7 @@ export default class SudokuGetCandidates {
           throw report;
         }
     
-        const candidate_map = {};
+        const candidate_map: { [square: string]: string } = {};
         const squares_values_map = this._get_square_vals_map(board);
     
         // Start by assigning every digit as a candidate to every square
@@ -100,7 +87,7 @@ export default class SudokuGetCandidates {
       _get_square_vals_map(board:string): Record<string,string> {
         /* Return a map of squares -> values
             */
-        const squares_vals_map = {};
+        const squares_vals_map: { [square: string]: string } = {};
     
         // Make sure `board` is a string of length 81
         if (board.length != this.instance.SQUARES.length) {

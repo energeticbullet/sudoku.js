@@ -15,9 +15,9 @@ interface SudokuCollection {
 
 export default function getSudoku(debug=false): SudokuCollection {
     const instance = new Sudoku(debug);
-    const generator = new SudokuGenerator(instance,debug);
-    const solver = new SudokuSolver(instance,debug);
-    const getCandidates = new SudokuGetCandidates(instance,debug);
+    const generator = new SudokuGenerator(instance);
+    const solver = new SudokuSolver(instance);
+    const getCandidates = new SudokuGetCandidates(instance);
     const statics = Object.freeze({
         DIGITS: Sudoku.DIGITS,
         ROWS: Sudoku.ROWS,
